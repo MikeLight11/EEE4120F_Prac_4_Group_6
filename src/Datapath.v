@@ -2,11 +2,11 @@
 // Practical 4: StarCore-1 — Single-Cycle Processor in Verilog
 // =========================================================================
 //
-// GROUP NUMBER:
+// GROUP NUMBER: 6
 //
 // MEMBERS:
-//   - Member 1 Name, Student Number
-//   - Member 2 Name, Student Number
+//   - Member 1 Michael Lighton, LGHMIC003
+//   - Member 2 Glen Jones, JNSGLE007
 
 // File        : Datapath.v
 // Description : StarCore-1 Datapath.
@@ -108,13 +108,22 @@ module Datapath (
     //           pc_current <= 16'd0;
     //       end
     //
+    initial begin // Initialize PC to 0 at the start of simulation
+        pc_current <= 16'd0; // Set PC to 0 (16-bit wide)
+    end
+
     // TODO: Update pc_current to pc_next on every positive clock edge.
     //
     //       always @(posedge clk) begin
     //           pc_current <= pc_next;
     //       end
     //
+    always @(posedge clk) begin
+        pc_current <= pc_next; // Update PC to the next value on the rising edge of the clock
+    end
+
     // TODO: Compute pc2 = pc_current + 16'd2 using a continuous assignment.
+    assign pc2 = pc_current + 16'd2; // Compute PC + 2 for sequential execution
 
 
     // =========================================================================
@@ -129,8 +138,14 @@ module Datapath (
     //           .instruction (instr)
     //       );
     //
+    InstructionMemory im (
+        .pc (pc_current), // Connect current PC to instruction memory address input
+        .instruction (instr) // Connect instruction memory output to instr wire
+    );
+
     // TODO: Drive the opcode output from the fetched instruction:
     //       assign opcode = instr[15:12];
+    assign opcode = instr[15:12]; // Extract opcode from the fetched instruction
 
 
     // =========================================================================
@@ -143,10 +158,13 @@ module Datapath (
     //
     //       assign reg_write_dest = reg_dst ? instr[5:3] : instr[8:6];
     //
+    assign reg_write_dest = reg_dst ? instr[5:3] : instr[8:6]; // Select write-back register address based on RegDst control
+
     // TODO: Assign the read addresses from the instruction fields:
     //       assign reg_read_addr_1 = instr[11:9];  // RS1
     //       assign reg_read_addr_2 = instr[8:6];   // RS2
-
+    assign reg_read_addr_1 = instr[11:9]; // RS1 address is always in instr[11:9]
+    assign reg_read_addr_2 = instr[8:6]; // RS2 address is always in instr[8:6]
 
     // =========================================================================
     // 4. GENERAL PURPOSE REGISTER FILE
@@ -164,7 +182,16 @@ module Datapath (
     //           .reg_read_addr_2  (reg_read_addr_2),
     //           .reg_read_data_2  (reg_read_data_2)
     //       );
-
+    GPR reg_file (
+        .clk (clk), // Connect clock to GPR
+        .reg_write_en (reg_write), // Connect register write enable control signal
+        .reg_write_dest (reg_write_dest), // Connect write-back register address
+        .reg_write_data (reg_write_data), // Connect write-back data
+        .reg_read_addr_1 (reg_read_addr_1), // Connect RS1 address for reading
+        .reg_read_data_1 (reg_read_data_1), // Connect RS1 data output
+        .reg_read_addr_2 (reg_read_addr_2), // Connect RS2 address for reading
+        .reg_read_data_2 (reg_read_data_2) // Connect RS2 data output
+    );
 
     // =========================================================================
     // 5. IMMEDIATE SIGN-EXTENSION
@@ -180,7 +207,7 @@ module Datapath (
     //         {10{instr[5]}} replicates the sign bit 10 times (bits 15:6)
     //         instr[5:0]     is the original 6-bit value (bits 5:0)
     //         Together they form a 16-bit sign-extended immediate.
-
+    assign ext_im = { {10{instr[5]}}, instr[5:0] }; // Sign-extend the 6-bit immediate to 16 bits
 
     // =========================================================================
     // 6. ALUSrc MULTIPLEXER
@@ -190,7 +217,7 @@ module Datapath (
     // =========================================================================
 
     // TODO: assign alu_operand_b = alu_src ? ext_im : reg_read_data_2;
-
+    assign alu_operand_b = alu_src ? ext_im : reg_read_data_2; // Select ALU operand B based on ALUSrc control
 
     // =========================================================================
     // 7. ALU CONTROL UNIT
@@ -203,7 +230,11 @@ module Datapath (
     //           .Opcode  (instr[15:12]),
     //           .ALU_Cnt (alu_control)
     //       );
-
+    ALU_Control alu_ctrl (
+        .ALUOp (alu_op), // Connect ALU operation class control signal
+        .Opcode (instr[15:12]), // Connect opcode from the instruction
+        .ALU_Cnt (alu_control) // Connect ALU control output to alu_control wire
+    );
 
     // =========================================================================
     // 8. ALU
@@ -218,7 +249,13 @@ module Datapath (
     //           .result      (alu_result),
     //           .zero        (zero_flag)
     //       );
-
+    ALU alu_unit (
+        .a (reg_read_data_1), // Connect ALU operand A from RS1
+        .b (alu_operand_b), // Connect ALU operand B from ALUSrc mux
+        .alu_control (alu_control), // Connect ALU control signals
+        .result (alu_result), // Connect ALU result output
+        .zero (zero_flag) // Connect ALU zero flag output
+    );
 
     // =========================================================================
     // 9. BRANCH ADDRESS COMPUTATION AND PC-NEXT MUX CHAIN
@@ -254,7 +291,13 @@ module Datapath (
     //       three most-significant bits of PC+2 and replaces bits [12:0]
     //       with the shifted offset, limiting jumps to within the same
     //       8 KB aligned region. This matches the StarCore ISA specification.
-
+    assign pc_branch = pc2 + {ext_im[14:0], 1'b0}; // Compute branch target address
+    assign beq_taken = beq & zero_flag; // Determine if BEQ condition is satisfied
+    assign bne_taken = bne & ~zero_flag; // Determine if BNE condition is satisfied
+    assign pc_after_branch = (beq_taken | bne_taken) ? pc_branch : pc2; // Select PC after branch evaluation
+    assign jump_target = {instr[11:0], 1'b0}; // Compute jump target from instruction
+    assign pc_jump = {pc2[15:13], jump_target}; // Compute full jump target address
+    assign pc_next = jump ? pc_jump : pc_after_branch; // Select next PC based on jump and branch conditions
 
     // =========================================================================
     // 10. DATA MEMORY
@@ -272,6 +315,14 @@ module Datapath (
     //           .mem_read        (mem_read),
     //           .mem_read_data   (mem_read_data)
     //       );
+    DataMemory dm (
+        .clk (clk), // Connect clock to data memory
+        .mem_access_addr (alu_result), // Connect ALU result as memory access address
+        .mem_write_data (reg_read_data_2), // Connect RS2 data as memory write data
+        .mem_write_en (mem_write), // Connect memory write enable control signal
+        .mem_read (mem_read), // Connect memory read enable control signal
+        .mem_read_data (mem_read_data) // Connect data memory output to mem_read_data wire
+    );
 
 
     // =========================================================================
@@ -282,6 +333,7 @@ module Datapath (
     // =========================================================================
 
     // TODO: assign reg_write_data = mem_to_reg ? mem_read_data : alu_result;
+    assign reg_write_data = mem_to_reg ? mem_read_data : alu_result; // Select write-back data based on MemToReg control
 
 
 endmodule
