@@ -5,8 +5,8 @@
 // GROUP NUMBER:
 //
 // MEMBERS:
-//   - Member 1 Name, Student Number
-//   - Member 2 Name, Student Number
+//   - Member 1 Michael Lighton, LGHMIC003
+//   - Member 2 Glen Jones, JNSGLE007
 
 // File        : GPR.v
 // Description : General Purpose Register File.
@@ -43,6 +43,7 @@ module GPR (
     //
     //       reg [15:0] reg_array [7:0];
     // -------------------------------------------------------------------------
+    reg [15:0] reg_array [7:0]; // 8 registers, each 16 bits wide
 
 
     // -------------------------------------------------------------------------
@@ -55,6 +56,11 @@ module GPR (
     //               reg_array[i] <= 16'd0;
     //       end
     // -------------------------------------------------------------------------
+    integer i; // Loop variable for initialization
+    initial begin // Initialize all registers to zero at simulation start
+    for (i = 0; i < 8; i = i + 1) // Loop through all 8 registers
+        reg_array[i] <= 16'd0; // Set each register to 0 (16-bit wide)
+    end
 
 
     // -------------------------------------------------------------------------
@@ -70,6 +76,10 @@ module GPR (
     //       IMPORTANT: Use non-blocking assignment (<=) here.
     //                  This models a real flip-flop-based register.
     // -------------------------------------------------------------------------
+    always @(posedge clk) begin // Synchronous write port
+        if (reg_write_en) // Check if write enable is asserted
+            reg_array[reg_write_dest] <= reg_write_data; // Write data to the specified register
+    end
 
 
     // -------------------------------------------------------------------------
@@ -85,6 +95,8 @@ module GPR (
     //       the read port returns the OLD value (before the write commits).
     //       Document this write-before-read behaviour in your report.
     // -------------------------------------------------------------------------
+    assign reg_read_data_1 = reg_array[reg_read_addr_1]; // Asynchronous read port 1
+    assign reg_read_data_2 = reg_array[reg_read_addr_2]; // Asynchronous read port 2
 
 
 endmodule
