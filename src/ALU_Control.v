@@ -66,6 +66,24 @@ module ALU_Control (
     //       (0, 1, X, or Z). This correctly encodes don't-care bits for the
     //       opcode field when ALUOp selects memory or branch mode.
     // -------------------------------------------------------------------------
+    wire [5:0] control_in; // Concatenate ALUOp and Opcode into a single control word for casex statement
+    assign control_in = {ALUOp, Opcode}; // control_in[5:4] = ALUOp, control_in[3:0] = Opcode
+
+    always @(*) begin // Combinational logic to determine ALU_Cnt based on control_in using casex statement
+        casex (control_in)
+            6'b10xxxx : ALU_Cnt = 3'b000; // Memory access (LD, ST) -> ADD
+            6'b01xxxx : ALU_Cnt = 3'b001; // Branch (BEQ, BNE) -> SUB
+            6'b000010 : ALU_Cnt = 3'b000; // ADD
+            6'b000011 : ALU_Cnt = 3'b001; // SUB
+            6'b000100 : ALU_Cnt = 3'b010; // INV (NOT)
+            6'b000101 : ALU_Cnt = 3'b011; // SHL
+            6'b000110 : ALU_Cnt = 3'b100; // SHR
+            6'b000111 : ALU_Cnt = 3'b101; // AND
+            6'b001000 : ALU_Cnt = 3'b110; // OR
+            6'b001001 : ALU_Cnt = 3'b111; // SLT
+            default   : ALU_Cnt = 3'b000; // Default to ADD for undefined opcodes
+        endcase
+    end
 
 
 endmodule

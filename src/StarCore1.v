@@ -2,11 +2,11 @@
 // Practical 4: StarCore-1 — Single-Cycle Processor in Verilog
 // =========================================================================
 //
-// GROUP NUMBER:
+// GROUP NUMBER: 6
 //
 // MEMBERS:
-//   - Member 1 Name, Student Number
-//   - Member 2 Name, Student Number
+//   - Member 1 Michael Lighton, LGHMIC003
+//   - Member 2 Glen Jones, JNSGLE007
 
 // File        : StarCore1.v
 // Description : Top-level StarCore-1 processor module.
