@@ -2,11 +2,11 @@
 // Practical 4: StarCore-1 — Single-Cycle Processor in Verilog
 // =========================================================================
 //
-// GROUP NUMBER:
+// GROUP NUMBER: 6
 //
 // MEMBERS:
-//   - Member 1 Name, Student Number
-//   - Member 2 Name, Student Number
+//   - Member 1 Michael Lighton, LGHMIC003
+//   - Member 2 Glen Jones, JNSGLE007
 
 // File        : DataMemory.v
 // Description : Data Memory (RAM).
@@ -42,6 +42,7 @@ module DataMemory (
     //
     //       reg [`COL-1:0] memory [`ROW_D-1:0];
     // -------------------------------------------------------------------------
+    reg [`COL-1:0] memory [`ROW_D-1:0]; // Data memory array: `ROW_D entries, each `COL bits wide
 
 
     // -------------------------------------------------------------------------
@@ -55,7 +56,7 @@ module DataMemory (
     //       (In a full system the byte offset within a word would also be
     //       handled, but StarCore-1 only supports 16-bit aligned accesses.)
     // -------------------------------------------------------------------------
-
+    wire [2:0] ram_addr = mem_access_addr[2:0]; // Maps byte address to word index for data memory
 
     // -------------------------------------------------------------------------
     // TODO: Load the data memory from file at simulation start.
@@ -78,6 +79,15 @@ module DataMemory (
     //           $fclose(log_fd);
     //       end
     // -------------------------------------------------------------------------
+    integer log_fd; // File descriptor for logging memory contents
+    initial begin
+        $readmemb("./test/test.data", memory); // Load data memory contents from file
+        log_fd = $fopen(`DMEM_LOG); // Open log file for writing
+        $fmonitor(log_fd, "t=%0t  [0]=%h [1]=%h [2]=%h [3]=%h",
+                  $time, memory[0], memory[1], memory[2], memory[3]); // Log memory contents on every change
+        `SIM_TIME; // Run simulation for specified time
+        $fclose(log_fd); // Close log file at the end of simulation
+    end
 
 
     // -------------------------------------------------------------------------
@@ -92,6 +102,10 @@ module DataMemory (
     //
     //       IMPORTANT: Use non-blocking assignment (<=).
     // -------------------------------------------------------------------------
+    always @(posedge clk) begin // Synchronous write port: triggered on the rising edge of the clock
+        if (mem_write_en) // Check if write enable is asserted
+            memory[ram_addr] <= mem_write_data; // Write data to the specified memory address using non-blocking assignment
+    end
 
 
     // -------------------------------------------------------------------------
@@ -102,6 +116,7 @@ module DataMemory (
     //
     //       assign mem_read_data = mem_read ? memory[ram_addr] : 16'd0;
     // -------------------------------------------------------------------------
+    assign mem_read_data = mem_read ? memory[ram_addr] : 16'd0; // Gated read port: output memory[ram_addr] when mem_read is asserted, otherwise 0
 
 
 endmodule

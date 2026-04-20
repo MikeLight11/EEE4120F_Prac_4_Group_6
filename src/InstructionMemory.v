@@ -32,7 +32,7 @@ module InstructionMemory (
     //
     //       reg [`COL-1:0] memory [`ROW_I-1:0];
     // -------------------------------------------------------------------------
-    reg [`COL-1:0] memory [`ROW_I-1:0]; // Instruction memory array: `ROW_I entries, each `COL bits wide
+    reg [`COL-1:0] memory [`ROW_I-1:0]; // stores program instructions in ROM 
 
 
     // -------------------------------------------------------------------------
@@ -49,7 +49,7 @@ module InstructionMemory (
     //           PC=0x0002 -> rom_addr=1
     //           PC=0x0004 -> rom_addr=2   ... and so on.
     // -------------------------------------------------------------------------
-    wire [3:0] rom_addr = pc[4:1]; // Derive word address from byte-addressed PC
+    wire [3:0] rom_addr = pc[4:1]; // Maps byte-addressed program counter to word index for instruction memory
 
     // -------------------------------------------------------------------------
     // TODO: Load the instruction memory contents from file at simulation start.
@@ -64,7 +64,7 @@ module InstructionMemory (
     //       end indices in the array to fill. Adjust if your program is longer.
     // -------------------------------------------------------------------------
     initial begin
-        $readmemb("./test/test.prog", memory, 0, 14); // Load instruction memory contents from file at simulation start
+        $readmemb("./test/test.prog", memory, 0, 14); // Load instruction memory contents from test file at simulation start
     end
 
 
