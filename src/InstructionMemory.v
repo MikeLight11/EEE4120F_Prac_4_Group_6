@@ -2,11 +2,11 @@
 // Practical 4: StarCore-1 — Single-Cycle Processor in Verilog
 // =========================================================================
 //
-// GROUP NUMBER:
+// GROUP NUMBER: 6
 //
 // MEMBERS:
-//   - Member 1 Name, Student Number
-//   - Member 2 Name, Student Number
+//   - Member 1 Michael Lighton, LGHMIC003
+//   - Member 2 Glen Jones, JNSGLE007
 
 // File        : InstructionMemory.v
 // Description : Instruction Memory (ROM).
@@ -32,6 +32,7 @@ module InstructionMemory (
     //
     //       reg [`COL-1:0] memory [`ROW_I-1:0];
     // -------------------------------------------------------------------------
+    reg [`COL-1:0] memory [`ROW_I-1:0]; // Instruction memory array: `ROW_I entries, each `COL bits wide
 
 
     // -------------------------------------------------------------------------
@@ -48,7 +49,7 @@ module InstructionMemory (
     //           PC=0x0002 -> rom_addr=1
     //           PC=0x0004 -> rom_addr=2   ... and so on.
     // -------------------------------------------------------------------------
-
+    wire [3:0] rom_addr = pc[4:1]; // Derive word address from byte-addressed PC
 
     // -------------------------------------------------------------------------
     // TODO: Load the instruction memory contents from file at simulation start.
@@ -62,6 +63,9 @@ module InstructionMemory (
     //       Note: the third and fourth arguments (0, 14) specify the start and
     //       end indices in the array to fill. Adjust if your program is longer.
     // -------------------------------------------------------------------------
+    initial begin
+        $readmemb("./test/test.prog", memory, 0, 14); // Load instruction memory contents from file at simulation start
+    end
 
 
     // -------------------------------------------------------------------------
@@ -70,6 +74,7 @@ module InstructionMemory (
     //
     //       assign instruction = memory[rom_addr];
     // -------------------------------------------------------------------------
+    assign instruction = memory[rom_addr]; // Drive instruction output with combinational assignment
 
 
 endmodule
