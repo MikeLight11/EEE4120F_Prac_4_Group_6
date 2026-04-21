@@ -67,7 +67,7 @@ module ALU_Control (
     //       opcode field when ALUOp selects memory or branch mode.
     // -------------------------------------------------------------------------
     wire [5:0] control_in; // Concatenate ALUOp and Opcode into a single control word for casex statement
-    assign control_in = {ALUOp, Opcode}; // control_in[5:4] = ALUOp, control_in[3:0] = Opcode
+    assign control_in = {ALUOp, Opcode}; // sticks them side by side: control_in[5:4] = ALUOp (2 bits), control_in[3:0] = Opcode (4 bits)
 
     always @(*) begin // Combinational logic to determine ALU_Cnt based on control_in using casex statement
         casex (control_in)
@@ -84,6 +84,10 @@ module ALU_Control (
             default   : ALU_Cnt = 3'b000; // Default to ADD for undefined opcodes
         endcase
     end
+    //ie if ALUOp indicates a memory access (10), ALU_Cnt is set to 000 (ADD) regardless of Opcode
+    //if ALUOp indicates a branch (01), ALU_Cnt is set to 001 (SUB) regardless of Opcode
+    //if ALUOp indicates R-type (00), ALU_Cnt is determined by Opcode, 
+    //with specific patterns for each R-type instruction and a default of ADD for undefined opcodes
 
 
 endmodule

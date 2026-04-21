@@ -50,6 +50,9 @@ module InstructionMemory (
     //           PC=0x0004 -> rom_addr=2   ... and so on.
     // -------------------------------------------------------------------------
     wire [3:0] rom_addr = pc[4:1]; // Maps byte-addressed program counter to word index for instruction memory
+    //only lower 4 bits of PC with bit 0 being ignored are used to index the instruction memory, since it has 16 entries (0-15)
+    //Effectively dividing the PC by 2 (to turn a Byte Address into a Word Index, you have to divide by 2. 
+    //in binary, dividing by 2 is the same as shifting right by 1 bit
 
     // -------------------------------------------------------------------------
     // TODO: Load the instruction memory contents from file at simulation start.

@@ -42,7 +42,7 @@ module DataMemory (
     //
     //       reg [`COL-1:0] memory [`ROW_D-1:0];
     // -------------------------------------------------------------------------
-    reg [`COL-1:0] memory [`ROW_D-1:0]; // Data memory array: `ROW_D entries, each `COL bits wide
+    reg [`COL-1:0] memory [`ROW_D-1:0]; // Data memory array: 16 entries, each 16 bits wide (defined in Parameter.v)
 
 
     // -------------------------------------------------------------------------
