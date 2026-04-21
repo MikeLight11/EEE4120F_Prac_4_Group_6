@@ -121,6 +121,36 @@ module GPR_tb;
         //                         R4=0xE004, R5=0xF005, R6=0x1006, R7=0x2007
 
 
+
+        for (i = 0; i < 8; i = i + 1) begin
+            reg_write_en = 1'b1;
+            reg_write_dest = i[2:0];    // loop index for destination address. 
+            // i[2:0], i is typ 32 bits long, only need first 3 bits to represent 0-7.
+           
+            // Using index to get correct pattern:
+            case(i)
+                3'd0: reg_write_data = 16'hA000;
+                3'd1: reg_write_data = 16'hB001;
+                3'd2: reg_write_data = 16'hC002;
+                3'd3: reg_write_data = 16'hD003;
+                3'd4: reg_write_data = 16'hE004;
+                3'd5: reg_write_data = 16'hF005;
+                3'd6: reg_write_data = 16'h1006;
+                3'd7: reg_write_data = 16'h2007;
+            endcase
+
+
+            @(posedge clk); #1;             // commit the write 
+            reg_write_en   = 1'b0;          // Deasert write enable
+
+            reg_read_addr_1 = i[2:0];       // asynchronous read settles
+            #2;   
+
+            // Verify
+            check16(reg_read_data_1, reg_write_data, test_id);  // Use same reg write data to check
+            test_id = test_id + 1;
+
+        end
         // ------------------------------------------------------------------
         // TEST GROUP 2: Write with reg_write_en = 0 must NOT change register
         // ------------------------------------------------------------------
@@ -138,6 +168,14 @@ module GPR_tb;
         //           check16(reg_read_data_1, 16'hA000, test_id);  // original value
         //           test_id = test_id + 1;
 
+        reg_write_en = 1'b0;    // Not enabled
+        reg_write_dest = 3'd0;  
+        reg_write_data = 16'hDEAD;  // Wont be written
+        reg_read_addr_1 = 3'd0;
+        #2;
+        check16(reg_read_data_1, 16'hA000, test_id);   
+        test_id = test_id + 1; 
+
 
         // ------------------------------------------------------------------
         // TEST GROUP 3: Simultaneous read from two different registers
@@ -153,6 +191,11 @@ module GPR_tb;
         //           check16(reg_read_data_1, 16'hB001, test_id); test_id=test_id+1;
         //           check16(reg_read_data_2, 16'hD003, test_id); test_id=test_id+1;
 
+        reg_read_addr_1 = 3'd1; // R1
+        reg_read_addr_2 = 3'd3; // R3
+        #2;
+        check16(reg_read_data_1, 16'hB001, test_id); test_id=test_id+1;
+        check16(reg_read_data_2, 16'hD003, test_id); test_id=test_id+1;
 
         // ------------------------------------------------------------------
         // TEST GROUP 4: Read during write (write-before-read behaviour)
@@ -178,6 +221,30 @@ module GPR_tb;
         //           check16(reg_read_data_1, 16'hNEW_VALUE, test_id); // after write
         //           test_id = test_id + 1;
 
+        // Preparing for
+        reg_write_en   = 1'b1;  
+        reg_write_dest = 3'd2;
+        reg_write_data = 16'hB00B;  // lol - data to be written
+
+        // set read address simultaneously (same reg)
+        reg_read_addr_1 = 3'd2;         // same as write dest
+
+        // Wait for combinational logic to end before clock edge. write hasnt happened so checking if read port 'sees through' to write_data or shows old curr value
+        #2;   // before clock edge
+        $display("INFO [T%0d]: Read during write = 0x%h (document this)",
+        test_id, reg_read_data_1);
+
+        test_id = test_id + 1;
+
+        // Trigger clock edg eto commit write to memory
+        @(posedge clk);
+        #1;
+        reg_write_en = 1'b0;
+
+        // Verify that the clock has passed and must be new value
+        #2;
+        check16(reg_read_data_1, 16'hB00B, test_id); // after write
+        test_id = test_id + 1;
 
         // ------------------------------------------------------------------
         // Summary
