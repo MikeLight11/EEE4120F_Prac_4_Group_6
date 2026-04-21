@@ -105,23 +105,23 @@ module StarCore1_tb;
     //       Until then, it will cause "Unable to bind" errors because the
     //       internal signals (pc_current, instr, etc.) do not yet exist.
     // -------------------------------------------------------------------------
-    // always @(posedge clk) begin
-    //     $display("%0t ns | PC=0x%h | instr=%b | R0=%3d R1=%3d R2=%3d R3=%3d | alu=%0d z=%b",
-    //         $time,
-    //         uut.DU.pc_current,
-    //         uut.DU.instr,
-    //         uut.DU.reg_file.reg_array[0],
-    //         uut.DU.reg_file.reg_array[1],
-    //         uut.DU.reg_file.reg_array[2],
-    //         uut.DU.reg_file.reg_array[3],
-    //         uut.DU.alu_result,
-    //         uut.DU.zero_flag
-    //     );
-    // end
-    //
+    always @(posedge clk) begin
+        $display("%0t ps | PC=0x%h | instr=%b | R0=%3d R1=%3d R2=%3d R3=%3d | alu=%0d z=%b",
+            $time,
+            uut.DU.pc_current,
+            uut.DU.instr,
+            uut.DU.reg_file.reg_array[0],
+            uut.DU.reg_file.reg_array[1],
+            uut.DU.reg_file.reg_array[2],
+            uut.DU.reg_file.reg_array[3],
+            uut.DU.alu_result,
+            uut.DU.zero_flag
+        );
+    end
+    
     // PLACEHOLDER — prints time only until you uncomment the full trace above.
     always @(posedge clk) begin
-        $display("%0t ns | clock tick (uncomment trace block when Datapath is implemented)",
+        $display("%0t ps | clock tick (uncomment trace block when Datapath is implemented)",
                  $time);
     end
 
@@ -161,26 +161,26 @@ module StarCore1_tb;
         // STEP 1: Verify register values after execution.
         // Uncomment and fill in expected values after implementing Datapath.v.
         // -----------------------------------------------------------------------
-        // $display("Checking R0 after LD (expect Mem[0] = 0x0001):");
-        // check16(uut.DU.reg_file.reg_array[0], 16'h0001, test_id);
-        // test_id = test_id + 1;
-        //
-        // $display("Checking R1 after LD (expect Mem[1] = 0x0002):");
-        // check16(uut.DU.reg_file.reg_array[1], 16'h0002, test_id);
-        // test_id = test_id + 1;
-        //
-        // $display("Checking R2 after ADD R0+R1 (expect 0x0001+0x0002 = 0x0003):");
-        // check16(uut.DU.reg_file.reg_array[2], 16'h0003, test_id);
-        // test_id = test_id + 1;
+        $display("Checking R1 after LD (expect Mem[1] = 0x0001):");
+        check16(uut.DU.reg_file.reg_array[1], 16'h0001, test_id);
+        test_id = test_id + 1;
+        
+        $display("Checking R2 after LD (expect Mem[2] = 0x0002):");
+        check16(uut.DU.reg_file.reg_array[2], 16'h0002, test_id);
+        test_id = test_id + 1;
+        
+        $display("Checking R3 after ADD R1+R3 (expect 0x0001+0x0002 = 0x0003):");
+        check16(uut.DU.reg_file.reg_array[3], 16'h0003, test_id);
+        test_id = test_id + 1;
 
         // -----------------------------------------------------------------------
         // STEP 2: Verify data memory after ST instruction.
         // The example program stores R2 to Mem[R1+0] = Mem[2] (address offset 0).
         // Uncomment after implementing Datapath.v.
         // -----------------------------------------------------------------------
-        // $display("Checking DataMem[2] after ST R2 -> Mem[R1+0]:");
-        // check16(uut.DU.dm.memory[2], 16'h0003, test_id);
-        // test_id = test_id + 1;
+        $display("Checking DataMem[2] after ST R2 -> Mem[R1+0]:");
+        check16(uut.DU.dm.memory[2], 16'h0003, test_id);
+        test_id = test_id + 1;
 
         // -----------------------------------------------------------------------
         // STEP 3: Verify additional R-type instruction results.
@@ -188,32 +188,63 @@ module StarCore1_tb;
         // NOTE: SUB happens AFTER ST in the example program so R2 changes.
         // Adjust expected values to match the state at end of SIM_TIME.
         // -----------------------------------------------------------------------
-        // $display("Add your R-type verification checks here...");
+        $display("R-type verification");
+        $display("Checking SUB R4,R1,R2: R2 = 0x0001 - 0x0002 = 0xFFFF:");
+        check16(uut.DU.reg_file.reg_array[4], 16'hFFFF, test_id);
+        test_id = test_id + 1;
 
         // -----------------------------------------------------------------------
         // STEP 4: Add your own checks for AND, OR, SLT, branch, jump effects.
         // -----------------------------------------------------------------------
+        $display("Checking R5 after AND R1, R2 (expect 0x0001 & 0x0002 = 0):");
+        check16(uut.DU.reg_file.reg_array[5], 16'h0000, test_id);
+        test_id = test_id + 1;
 
+        // Verify OR result
+        $display("Checking R6 after OR R1, R2 (expect 0x0001 | 0x0002 = 3):");
+        check16(uut.DU.reg_file.reg_array[6], 16'h0003, test_id);
+        test_id = test_id + 1;
+
+        // Verify Set-Less-Than (SLT)
+        $display("Checking R7 after SLT R0, R1 (expect 1 < 2 = 1):");
+        check16(uut.DU.reg_file.reg_array[7], 16'h0001, test_id);
+        test_id = test_id + 1;
+
+        $display("Checking branch not equal: BNE, R1, R2 - should skip R4 set");
+        // If this failed to branch correctly, R4 would be set to EEEE
+        // R4 Should remain as FFF
+        check16(uut.DU.reg_file.reg_array[4], 16'hFFFF, test_id);
+        test_id = test_id + 1;
+
+        $display("Checking branch equal: BE, R5, R3 - Should skip past R5 set");
+        // If this fails, R5 set to EEEE
+         check16(uut.DU.reg_file.reg_array[5], 16'h0000, test_id);
+        test_id = test_id + 1;
+
+        $display("Checking jump works: If not, sets R0 to 0xEEEE");
+        check16(uut.DU.reg_file.reg_array[1], 16'h0001, test_id);
+        test_id = test_id + 1;
+        
         // -----------------------------------------------------------------------
         // Print register and memory state (safe to uncomment after Task 7)
         // -----------------------------------------------------------------------
-        // $display("");
-        // $display("--- Final Register File State ---");
-        // $display("R0=0x%h  R1=0x%h  R2=0x%h  R3=0x%h",
-        //     uut.DU.reg_file.reg_array[0], uut.DU.reg_file.reg_array[1],
-        //     uut.DU.reg_file.reg_array[2], uut.DU.reg_file.reg_array[3]);
-        // $display("R4=0x%h  R5=0x%h  R6=0x%h  R7=0x%h",
-        //     uut.DU.reg_file.reg_array[4], uut.DU.reg_file.reg_array[5],
-        //     uut.DU.reg_file.reg_array[6], uut.DU.reg_file.reg_array[7]);
-        //
-        // $display("");
-        // $display("--- Final Data Memory State ---");
-        // $display("Mem[0]=0x%h  Mem[1]=0x%h  Mem[2]=0x%h  Mem[3]=0x%h",
-        //     uut.DU.dm.memory[0], uut.DU.dm.memory[1],
-        //     uut.DU.dm.memory[2], uut.DU.dm.memory[3]);
-        // $display("Mem[4]=0x%h  Mem[5]=0x%h  Mem[6]=0x%h  Mem[7]=0x%h",
-        //     uut.DU.dm.memory[4], uut.DU.dm.memory[5],
-        //     uut.DU.dm.memory[6], uut.DU.dm.memory[7]);
+        $display("");
+        $display("--- Final Register File State ---");
+        $display("R0=0x%h  R1=0x%h  R2=0x%h  R3=0x%h",
+            uut.DU.reg_file.reg_array[0], uut.DU.reg_file.reg_array[1],
+            uut.DU.reg_file.reg_array[2], uut.DU.reg_file.reg_array[3]);
+        $display("R4=0x%h  R5=0x%h  R6=0x%h  R7=0x%h",
+            uut.DU.reg_file.reg_array[4], uut.DU.reg_file.reg_array[5],
+            uut.DU.reg_file.reg_array[6], uut.DU.reg_file.reg_array[7]);
+    
+        $display("");
+        $display("--- Final Data Memory State ---");
+        $display("Mem[0]=0x%h  Mem[1]=0x%h  Mem[2]=0x%h  Mem[3]=0x%h",
+            uut.DU.dm.memory[0], uut.DU.dm.memory[1],
+            uut.DU.dm.memory[2], uut.DU.dm.memory[3]);
+        $display("Mem[4]=0x%h  Mem[5]=0x%h  Mem[6]=0x%h  Mem[7]=0x%h",
+            uut.DU.dm.memory[4], uut.DU.dm.memory[5],
+            uut.DU.dm.memory[6], uut.DU.dm.memory[7]);
 
         // -----------------------------------------------------------------------
         // Summary
