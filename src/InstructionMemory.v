@@ -67,9 +67,9 @@ module InstructionMemory (
     //       end indices in the array to fill. Adjust if your program is longer.
     // -------------------------------------------------------------------------
     initial begin
-        $readmemb("./test/test.prog", memory, 0, 14); // Load instruction memory contents from test file at simulation start
+        $readmemb("./test.prog", memory, 0, 14); // Load instruction memory contents from test file at simulation start
     end
-
+    // Had to change to ./test.prog because it cd's into test in make file...
 
     // -------------------------------------------------------------------------
     // TODO: Drive the instruction output with a continuous assignment.
