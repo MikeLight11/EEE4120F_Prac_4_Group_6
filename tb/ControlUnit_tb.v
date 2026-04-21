@@ -51,6 +51,7 @@ module ControlUnit_tb;
 
     integer fail_count;
     integer test_id;
+    integer i;
 
     // -------------------------------------------------------------------------
     // Composite check task — verifies all 10 control signals in one call.
@@ -104,25 +105,84 @@ module ControlUnit_tb;
         // JMP      |   0    |   0    |    0     |    0     |   0   |   0   |   0    |  00   |  1
         // Reserved |   0    |   0    |    0     |    0     |   0   |   0   |   0    |  00   |  0
 
-        // ------------------------------------------------------------------
         // TODO: Apply each opcode and call check_ctrl with expected values.
-        //
-        //       // LD (opcode = 4'b0000)
-        //       opcode = 4'b0000; #10;
-        //       //        alu_op  jump  beq   bne   mr    mw    as    rd    mtr   rw    id
-        //       check_ctrl(2'b10, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b1, test_id);
-        //       test_id = test_id + 1;
-        //
-        //       // ST (opcode = 4'b0001)
-        //       opcode = 4'b0001; #10;
-        //       check_ctrl(2'b10, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, test_id);
-        //       test_id = test_id + 1;
-        //
-        //       // ADD (opcode = 4'b0010)  -- R-type
-        //       opcode = 4'b0010; #10;
-        //       check_ctrl(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b1, test_id);
-        //       test_id = test_id + 1;
-        //
+        
+        // LD (opcode = 4'b0000)
+        opcode = 4'b0000; #10;
+        //        alu_op  jump  beq   bne   mr    mw    as    rd    mtr   rw    id
+        check_ctrl(2'b10, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b1, test_id);
+        test_id = test_id + 1;
+        
+        // ST (opcode = 4'b0001)
+        opcode = 4'b0001; #10;
+        check_ctrl(2'b10, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, test_id);
+        test_id = test_id + 1;
+
+        // ADD (opcode = 4'b0010)
+        opcode = 4'b0010; #10;
+        check_ctrl(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b1, test_id);
+        test_id = test_id + 1;
+
+        // SUB (opcode = 4'b0011)
+        opcode = 4'b0011; #10;
+        check_ctrl(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b1, test_id);
+        test_id = test_id + 1;
+
+        // INV (opcode = 4'b0100)
+        opcode = 4'b0100; #10;
+        check_ctrl(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b1, test_id);
+        test_id = test_id + 1;
+
+        // SHL (opcode = 4'b0101)
+        opcode = 4'b0101; #10;
+        check_ctrl(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b1, test_id);
+        test_id = test_id + 1;
+
+        // SHR (opcode = 4'b0110)
+        opcode = 4'b0110; #10;
+        check_ctrl(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b1, test_id);
+        test_id = test_id + 1;
+
+        // AND (opcode = 4'b0111)
+        opcode = 4'b0111; #10;
+        check_ctrl(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b1, test_id);
+        test_id = test_id + 1;
+
+        // OR (opcode = 4'b1000)
+        opcode = 4'b1000; #10;
+        check_ctrl(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b1, test_id);
+        test_id = test_id + 1;
+
+        // SLT (opcode = 4'b1001)
+        opcode = 4'b1001; #10;
+        check_ctrl(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b1, test_id);
+        test_id = test_id + 1;
+
+        //6 BEQ (opcode = 4'b1011)
+        opcode = 4'b1011; #10;
+        check_ctrl(2'b01, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, test_id);
+        test_id = test_id + 1;
+
+        // BNE (opcode = 4'b1100)
+        opcode = 4'b1100; #10;
+        check_ctrl(2'b01, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, test_id);
+        test_id = test_id + 1;
+
+        // JMP (opcode = 4'b1101)
+        opcode = 4'b1101; #10;
+        check_ctrl(2'b00, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, test_id);
+        test_id = test_id + 1;
+
+        // Reserved (opcode = 4'b1010)
+        opcode = 4'b1010; #10;
+        check_ctrl(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, test_id);
+        test_id = test_id + 1;
+
+        // Default / Undefined (opcode = 4'b1111)
+        opcode = 4'b1111; #10;
+        check_ctrl(2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, test_id);
+        test_id = test_id + 1;
+ 
         //       // ... continue for all R-type opcodes (0010 through 1001)
         //       // ... then BEQ (1011), BNE (1100), JMP (1101)
         //       // ... and reserved (1010) and a default/undefined opcode
@@ -130,7 +190,6 @@ module ControlUnit_tb;
         //       NOTE on Branch: the manual's 'Branch' column maps to beq=1
         //       for BEQ and bne=1 for BNE. Both beq and bne are 0 for JMP.
         // ------------------------------------------------------------------
-
 
         $display("");
         if (fail_count == 0)
