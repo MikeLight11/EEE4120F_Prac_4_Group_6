@@ -42,6 +42,7 @@ module DataMemory_tb;
 
     integer fail_count;
     integer test_id;
+    integer i;
 
     initial begin
         fail_count      = 0;
@@ -73,6 +74,26 @@ module DataMemory_tb;
         //           $display("PASS [T%0d]", test_id);
         //       test_id = test_id + 1;
 
+            for(i = 0; i < 8 ; i=i+1) begin
+                // set contorl signal and addrs
+                mem_read = 1'b1;
+                mem_access_addr = i[15:0];
+                #5;
+
+                // Check result contains 16'h0001 for all entries
+                if (mem_read_data !== (i + 16'h0001)) begin
+                    $display("FAIL [T%0d]: addr=0 got=0x%h exp=0x%h", test_id, mem_read_data, (16'h0001));
+                    fail_count = fail_count + 1;
+                end
+                else begin
+                   $display("PASS [T%0d]", test_id);
+               end
+
+               test_id = test_id + 1;
+            end
+
+
+
 
         // ------------------------------------------------------------------
         // TEST GROUP 2: Write new values to all 8 locations, then read back
@@ -95,6 +116,38 @@ module DataMemory_tb;
         //       if (mem_read_data !== 16'hABCD) ...
         //       test_id = test_id + 1;
 
+        // Writing Values
+        for (i=0; i < 8; i = i + 1) begin
+            mem_read        = 1'b0; // DEassign
+            mem_write_en    = 1'b1;
+            mem_access_addr = i[15:0];
+            mem_write_data  = i[15:0] + 16'hABCD; // Distinct value for each cell
+
+            @(posedge clk); #1;
+        end
+        
+        mem_write_en = 1'b0; // Turn off write enable after writing
+
+    // Read and verify
+        for (i=0; i<8; i = i + 1) begin
+            mem_read = 1'b1;
+            mem_access_addr = i[15:0];
+            #5; // wait for readout
+
+            if (mem_read_data !== (i[15:0] + 16'hABCD)) begin
+                $display("FAIL [T%0d]: Write/Read addr=%0d got=0x%h exp=0x%h", 
+                          test_id, i, mem_read_data, (i + 16'hABCD));
+                fail_count = fail_count + 1;
+            end else begin
+                $display("PASS [T%0d]", test_id);
+            end
+            test_id = test_id + 1;
+
+        end
+
+
+
+
 
         // ------------------------------------------------------------------
         // TEST GROUP 3: mem_read = 0 must produce 16'd0 output
@@ -113,6 +166,24 @@ module DataMemory_tb;
         //       test_id = test_id + 1;
 
 
+        for (i = 0; i <8; i = i + 1) begin
+            mem_read = 1'b0;
+            mem_write_en = 1'b0;
+            mem_access_addr = i[15:0];
+            #5;
+
+            // Verify output zero
+            if (mem_read_data !== 16'd0) begin
+               $display("FAIL [T%0d]: mem_read=0 but output=%h", test_id, mem_read_data);
+               fail_count = fail_count + 1;
+            end else begin
+              $display("PASS [T%0d]: output = 0 when mem_read=0", test_id);
+            end
+
+           test_id = test_id + 1;
+
+        end
+
         // ------------------------------------------------------------------
         // TEST GROUP 4: Write then immediately read on the next cycle
         // ------------------------------------------------------------------
@@ -121,6 +192,30 @@ module DataMemory_tb;
         // TODO: Write to address 3, then on the very next cycle read back
         //       from address 3 and confirm the new value is returned.
 
+        // Writing data
+        mem_read = 1'b0;
+        mem_write_en = 1'b1;
+        mem_access_addr = 16'd3;
+        mem_write_data = 16'hB00B;
+
+        // TRigger setup Read signals
+        @(posedge clk)
+        #1;     // small delay
+
+        // Immediately read sifgnals
+        mem_write_en = 1'b0;
+        mem_read = 1'b1;
+        mem_access_addr = 3'd3;
+        #5; // wait for combinational logic output
+
+        // Verify
+        if (mem_read_data !== 16'hB00B) begin 
+            $display("FAIL [T%0d]: RAW Test address = 3, got 0x%h exp = 0xB00B", test_id,mem_read_data);
+            fail_count = fail_count + 1;
+        end else begin  
+            $display("PASS [T%0d]", test_id);
+        end
+        test_id = test_id + 1;
 
         // ------------------------------------------------------------------
         // TEST GROUP 5: Disabled write must not alter memory
@@ -129,6 +224,27 @@ module DataMemory_tb;
 
         // TODO: Assert mem_write_en=0, clock one cycle, then read and confirm
         //       the previous value is unchanged.
+
+
+        // Didnt specify for which, so doing all
+        for(i = 0; i < 8; i = i + 1)begin
+            // Try write whith write disabled
+            mem_write_en = 1'b0;
+            mem_access_addr = i[15:0];
+            mem_write_data = 16'hABBA;
+
+            @(posedge clk);
+            #1;
+
+            if (mem_read_data == 16'hABBA) begin
+                $display("FAIL [T%0d]: Disabled write failed at addr=%0d", test_id, i);
+                fail_count = fail_count + 1;
+            end else begin
+                $display("PASS [T%0d]: addr=%0d no write protected", test_id, i);
+            end
+        
+            test_id = test_id + 1;
+        end
 
 
         $display("");

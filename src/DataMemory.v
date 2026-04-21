@@ -81,7 +81,7 @@ module DataMemory (
     // -------------------------------------------------------------------------
     integer log_fd; // File descriptor for logging memory contents
     initial begin
-        $readmemb("./test/test.data", memory); // Load data memory contents from file
+        $readmemb("./test.data", memory); // Load data memory contents from file
         log_fd = $fopen(`DMEM_LOG); // Open log file for writing
         $fmonitor(log_fd, "t=%0t  [0]=%h [1]=%h [2]=%h [3]=%h",
                   $time, memory[0], memory[1], memory[2], memory[3]); // Log memory contents on every change
