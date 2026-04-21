@@ -127,7 +127,8 @@ module ControlUnit (
     // -------------------------------------------------------------------------
     always @(*) begin
         // Safe defaults: no writes, no branches, no jumps
-        reg_dst    = 1'b0;
+        // Sets all signals to 0
+        reg_dst    = 1'b0; 
         alu_src    = 1'b0;
         mem_to_reg = 1'b0;
         reg_write  = 1'b0;
@@ -139,7 +140,7 @@ module ControlUnit (
         jump       = 1'b0;
 
         case (opcode)
-            4'b0000: begin // LD
+            4'b0000: begin // LD (Load) Memory Access
                 reg_dst    = 1'b0;
                 alu_src    = 1'b1;
                 mem_to_reg = 1'b1;
@@ -148,7 +149,7 @@ module ControlUnit (
                 alu_op     = 2'b10;
             end
 
-            4'b0001: begin // ST
+            4'b0001: begin // ST (Store) Memory Access
                 alu_src    = 1'b1;
                 mem_write  = 1'b1;
                 alu_op     = 2'b10;
@@ -159,11 +160,12 @@ module ControlUnit (
             4'b0110, 4'b0111, 4'b1000, 4'b1001: begin
                 reg_dst    = 1'b1;
                 reg_write  = 1'b1;
-                alu_op     = 2'b00;
+                alu_op     = 2'b00; 
             end
 
             4'b1010: begin
                 // Reserved: no-op (defaults)
+                // alu_op remains 00 (R-type)
             end
 
             4'b1011: begin // BEQ
@@ -178,6 +180,7 @@ module ControlUnit (
 
             4'b1101: begin // JMP
                 jump       = 1'b1;
+                //alu_op remains 00 (R-type) since ALU is not used for jump address calculation
             end
 
             default: begin

@@ -36,7 +36,7 @@ module ALU (
     //       assign zero = ...;
     // -------------------------------------------------------------------------
 
-    assign zero = (result == 16'd0);
+    assign zero = (result == 16'd0); //zero flag is 1 when result is zero, otherwise 0
 
     // -------------------------------------------------------------------------
     // TODO: Implement the ALU operations using a combinational always block.
