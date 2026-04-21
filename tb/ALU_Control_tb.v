@@ -67,6 +67,24 @@ module ALU_Control_tb;
         //       check_cnt(ALU_Cnt, 3'b000, test_id); test_id=test_id+1;
 
 
+        // ALUOP Testing (10, Memory Access)
+        ALUOp = 2'b10; // Setting control tupe (memory operations)
+        Opcode = 4'b10; #10  // Function code - overidden by ALUOp regardless of cal
+        check_cnt(ALU_Cnt, 3'b000, test_id);
+        test_id = test_id + 1;
+
+        ALUOp = 2'b10; // Setting control tupe (memory operations)
+        Opcode = 4'hF; #10  // Function code - overidden by ALUOp regardless of cal
+        check_cnt(ALU_Cnt, 3'b000, test_id);
+        test_id = test_id + 1;
+
+        ALUOp = 2'b10; // Setting control tupe (memory operations)
+        Opcode = 4'hE; #10  // Function code - overidden by ALUOp regardless of cal
+        check_cnt(ALU_Cnt, 3'b000, test_id);
+        test_id = test_id + 1;
+
+
+
         // ------------------------------------------------------------------
         // ALUOp = 01 (branch) — always SUB regardless of opcode
         // ------------------------------------------------------------------
@@ -74,6 +92,45 @@ module ALU_Control_tb;
 
         // TODO: Apply ALUOp=2'b01 with several opcode values and verify
         //       ALU_Cnt is always 3'b001 (SUB).
+
+        ALUOp = 2'b01; // Setting control type (branch operations)
+        Opcode = 4'h0; #10;
+        check_cnt(ALU_Cnt, 3'b001, test_id); 
+        test_id = test_id + 1;
+
+        ALUOp = 2'b01;
+        Opcode = 4'h1; #10;
+        check_cnt(ALU_Cnt, 3'b001, test_id); 
+        test_id = test_id + 1;
+
+        ALUOp = 2'b01;
+        Opcode = 4'h2; #10;
+        check_cnt(ALU_Cnt, 3'b001, test_id); 
+        test_id = test_id + 1;
+
+        ALUOp = 2'b01;
+        Opcode = 4'h3; #10;
+        check_cnt(ALU_Cnt, 3'b001, test_id); 
+        test_id = test_id + 1;
+
+        ALUOp = 2'b01;
+        Opcode = 4'h4; #10;
+        check_cnt(ALU_Cnt, 3'b001, test_id); 
+        test_id = test_id + 1;
+
+        ALUOp = 2'b01;
+        Opcode = 4'h5; #10;
+        check_cnt(ALU_Cnt, 3'b001, test_id); 
+        test_id = test_id + 1;
+
+        ALUOp = 2'b01;
+        Opcode = 4'hF; #10;
+        check_cnt(ALU_Cnt, 3'b001, test_id); 
+        test_id = test_id + 1;
+
+
+
+
 
 
         // ------------------------------------------------------------------
@@ -96,6 +153,38 @@ module ALU_Control_tb;
         //       check_cnt(ALU_Cnt, 3'b000, test_id); test_id=test_id+1;
         //       ... etc.
 
+        ALUOp = 2'b00; Opcode = 4'h2; #10;
+        check_cnt(ALU_Cnt, 3'b00, test_id);
+        test_id = test_id + 1;
+
+        ALUOp = 2'b00; Opcode = 4'h3; #10;
+        check_cnt(ALU_Cnt, 3'b001, test_id);
+        test_id = test_id + 1;
+
+        ALUOp = 2'b00; Opcode = 4'h4; #10;
+        check_cnt(ALU_Cnt, 3'b010, test_id);
+        test_id = test_id + 1;
+
+        ALUOp = 2'b00; Opcode = 4'h5; #10;
+        check_cnt(ALU_Cnt, 3'b011, test_id);
+        test_id = test_id + 1;
+
+        ALUOp = 2'b00; Opcode = 4'h6; #10;
+        check_cnt(ALU_Cnt, 3'b100, test_id);
+        test_id = test_id + 1;
+
+        ALUOp = 2'b00; Opcode = 4'h7; #10;
+        check_cnt(ALU_Cnt, 3'b101, test_id);
+        test_id = test_id + 1;
+
+        ALUOp = 2'b00; Opcode = 4'h8; #10;
+        check_cnt(ALU_Cnt, 3'b110, test_id);
+        test_id = test_id + 1;
+
+        ALUOp = 2'b00; Opcode = 4'h9; #10;
+        check_cnt(ALU_Cnt, 3'b111, test_id);
+        test_id = test_id + 1;
+
 
         // ------------------------------------------------------------------
         // Default case
@@ -104,6 +193,14 @@ module ALU_Control_tb;
 
         // TODO: Apply ALUOp=2'b00 with an undefined opcode (e.g. 4'hA or 4'hF)
         //       and verify ALU_Cnt defaults to 3'b000.
+
+        ALUOp = 2'b00; Opcode = 4'hA; #10;
+        check_cnt(ALU_Cnt, 3'b000, test_id);
+        test_id = test_id + 1;
+
+        ALUOp = 2'b00; Opcode = 4'hF; #10;
+        check_cnt(ALU_Cnt, 3'b000, test_id);
+        test_id = test_id + 1;
 
 
         $display("");
