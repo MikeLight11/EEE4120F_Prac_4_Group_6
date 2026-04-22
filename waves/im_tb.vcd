@@ -1,0 +1,103 @@
+$date
+	Wed Apr 22 11:20:21 2026
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module InstructionMemory_tb $end
+$var wire 16 ! instruction [15:0] $end
+$var reg 16 " pc [15:0] $end
+$var integer 32 # fail_count [31:0] $end
+$var integer 32 $ i [31:0] $end
+$var integer 32 % test_id [31:0] $end
+$scope module uut $end
+$var wire 16 & instruction [15:0] $end
+$var wire 16 ' pc [15:0] $end
+$var wire 4 ( rom_addr [3:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+$end
+#0
+$dumpvars
+b0 (
+b0 '
+b1000000 &
+b1 %
+b0 $
+b0 #
+b0 "
+b1000000 !
+$end
+#5000
+b10000001 !
+b10000001 &
+b1 (
+b10 "
+b10 '
+b1 $
+b10 %
+#10000
+b10001010011000 !
+b10001010011000 &
+b10 (
+b100 "
+b100 '
+b10 $
+b11 %
+#15000
+b1000011000010 !
+b1000011000010 &
+b11 (
+b110 "
+b110 '
+b11 $
+b100 %
+#20000
+b11001010100000 !
+b11001010100000 &
+b100 (
+b1000 "
+b1000 '
+b100 $
+b101 %
+#25000
+b111001010101000 !
+b111001010101000 &
+b101 (
+b1010 "
+b1010 '
+b101 $
+b110 %
+#30000
+b1000001010110000 !
+b1000001010110000 &
+b110 (
+b1100 "
+b1100 '
+b110 $
+b111 %
+#35000
+b1001001010111000 !
+b1001001010111000 &
+b111 (
+b1110 "
+b1110 '
+b111 $
+b1000 %
+#40000
+b1100001010000001 !
+b1100001010000001 &
+b1000 (
+b10000 "
+b10000 '
+b1000 $
+b1001 %
+#45000
+b1001 $
+b1010 %

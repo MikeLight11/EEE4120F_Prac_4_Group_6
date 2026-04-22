@@ -14,6 +14,7 @@
 //                   `include "../src/Parameter.v"
 // =============================================================================
 
+// Compiler guards - prevent from being inlcuded more than once during compilation
 `ifndef PARAMETER_H_
 `define PARAMETER_H_
 
@@ -29,7 +30,7 @@
 // Increase SIM_TIME if your test program needs more clock cycles to complete.
 // At 10 ns per clock (100 MHz) each #10 is one half-period; 320 ns = 16 cycles.
 // ---------------------------------------------------------------------------
-`define SIM_TIME  #640      // Total simulation time for integration testbench
+`define SIM_TIME #640      // 640 - 100000 Total simulation time for integration testbench
 
 // ---------------------------------------------------------------------------
 // Output file for data-memory dump (used in DataMemory.v $fmonitor)

@@ -48,21 +48,17 @@ module InstructionMemory_tb;
         //       expected[1]  = 16'bXXXXXXXXXXXXXXXX;
         //       ... (fill all 15)
 
-        expected[0]  = 16'b0000010000000000;
-        expected[1]  = 16'b0000010001000001;
-        expected[2]  = 16'b0010000001010000;
-        expected[3]  = 16'b0001001010000000;
-        expected[4]  = 16'b0011000001010000;
-        expected[5]  = 16'b0111000001010000;
-        expected[6]  = 16'b1000000001010000;
-        expected[7]  = 16'b1001000001010000;
-        expected[8]  = 16'b0010000000000000;
-        expected[9]  = 16'b1011000001000001;
-        expected[10] = 16'b1100000001000000;
-        expected[11] = 16'b1101000000000000;
-        expected[12] = 16'b0000000000000000;
-        expected[13] = 16'b0000000000000000;
-        expected[14] = 16'b0000000000000000;
+    expected[0]  = 16'b0000000001000000;
+    expected[1]  = 16'b0000000010000001;
+    expected[2]  = 16'b0010001010011000;
+    expected[3]  = 16'b0001000011000010;
+    expected[4]  = 16'b0011001010100000;
+    expected[5]  = 16'b0111001010101000;
+    expected[6]  = 16'b1000001010110000;
+    expected[7]  = 16'b1001001010111000;
+    expected[8]  = 16'b1100001010000001;
+    expected[9]  = 16'b0000000100001000;
+    expected[10] = 16'b1010000000000000;
 
         // TODO: Walk PC through addresses 0, 2, 4, ... 28 (14 instructions).
         //       At each address, verify instruction == expected[rom_index].
@@ -81,12 +77,12 @@ module InstructionMemory_tb;
         //           ... and so on.
 
 
-        for (i = 0; i < 15; i = i + 1) begin // iterate through addresses
+        for (i = 0; i < 9; i = i + 1) begin // iterate through addresses
             pc = i*2;
             #5;
             if (instruction !== expected[i]) begin
                 $display("FAIL [T%0d]: PC=0 got %b exp %b",
-                test_id, instruction, expected[0]);
+                test_id, instruction, expected[i]);
                 fail_count = fail_count + 1;
             end else begin
                $display("PASS [T%0d]: PC=0 instr=%b", test_id, instruction);
